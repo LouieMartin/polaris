@@ -26,17 +26,19 @@ func isEndgame(position *chess.Position) bool {
 }
 
 func getPositionalValue(piece chess.Piece, square chess.Square, endgame bool) float64 {
-	var pieceSquareTables [6][64]float64 = pieceSquareTables[piece.Color()-1]
+	if piece.Color() == chess.Black {
+		square ^= 56
+	}
 
 	if piece.Type() == chess.King && endgame {
 		if piece.Color() == chess.White {
-			return whiteKingEndgameSquareTable[square]
+			return kingEndgameSquareTable[square]
 		} else {
-			return blackKingEndgameSquareTable[square]
+			return kingEndgameSquareTable[square]
 		}
 	}
 
-	return pieceSquareTables[piece.Type()-1][square]
+	return pieceSquareTables[piece.Type()][square]
 }
 
 func evaluatePiece(piece chess.Piece, square chess.Square, endgame bool) float64 {
