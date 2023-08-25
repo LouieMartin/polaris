@@ -43,7 +43,7 @@ func getPositionalValue(piece chess.Piece, square chess.Square, endgame bool) fl
 
 func evaluatePiece(piece chess.Piece, square chess.Square, endgame bool) float64 {
 	var positionalValue float64 = getPositionalValue(piece, square, endgame)
-	var materialValue float64 = pieceValues[piece.Type()-1]
+	var materialValue float64 = pieceValues[piece.Type()]
 
 	return positionalValue + materialValue
 }
@@ -79,13 +79,13 @@ func evaluate(position *chess.Position) float64 {
 
 func evaluateCapture(move *chess.Move, position *chess.Position) float64 {
 	if move.HasTag(chess.EnPassant) {
-		return pieceValues[chess.Pawn-1]
+		return pieceValues[chess.Pawn]
 	}
 
 	var capturedPiece chess.Piece = position.Board().Piece(move.S2())
 	var piece chess.Piece = position.Board().Piece(move.S1())
 
-	return pieceValues[capturedPiece.Type()-1] - pieceValues[piece.Type()-1]
+	return pieceValues[capturedPiece.Type()] - pieceValues[piece.Type()]
 }
 
 func evaluateMove(move *chess.Move, endgame bool, position *chess.Position) float64 {
@@ -111,3 +111,4 @@ func evaluateMove(move *chess.Move, endgame bool, position *chess.Position) floa
 
 	return (positionalValue + materialChange) * perspective
 }
+
