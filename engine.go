@@ -64,8 +64,6 @@ func negamax(depth uint8, alpha float64, beta float64, position *chess.Position)
 	}
 
 	if len(moves) == 0 {
-		fmt.Println("Draw")
-
 		return 0.0
 	}
 
