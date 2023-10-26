@@ -1,8 +1,8 @@
-package main
+package constants
 
 import "github.com/notnil/chess"
 
-var pieceValues map[chess.PieceType]float64 = map[chess.PieceType]float64{
+var PieceValues map[chess.PieceType]float64 = map[chess.PieceType]float64{
 	chess.King:   20000.0,
 	chess.Queen:  900.0,
 	chess.Rook:   500.0,
@@ -11,7 +11,7 @@ var pieceValues map[chess.PieceType]float64 = map[chess.PieceType]float64{
 	chess.Pawn:   100.0,
 }
 
-var kingEndgameSquareTable [64]float64 = [64]float64{
+var KingEndgameSquareTable [64]float64 = [64]float64{
 	-50.0, -30.0, -30.0, -30.0, -30.0, -30.0, -30.0, -50.0,
 	-30.0, -30.0, 0.0, 0.0, 0.0, 0.0, -30.0, -30.0,
 	-30.0, -10.0, 20.0, 30.0, 30.0, 20.0, -10.0, -30.0,
@@ -22,7 +22,7 @@ var kingEndgameSquareTable [64]float64 = [64]float64{
 	-50.0, -40.0, -30.0, -20.0, -20.0, -30.0, -40.0, -50.0,
 }
 
-var pieceSquareTables map[chess.PieceType][64]float64 = map[chess.PieceType][64]float64{
+var PieceSquareTables map[chess.PieceType][64]float64 = map[chess.PieceType][64]float64{
 	chess.King: {
 		20.0, 30.0, 10.0, 0.0, 0.0, 10.0, 30.0, 20.0,
 		20.0, 20.0, 0.0, 0.0, 0.0, 0.0, 20.0, 20.0,
