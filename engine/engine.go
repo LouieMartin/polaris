@@ -23,13 +23,13 @@ func OrderMoves(moves []*chess.Move, position *chess.Position) {
 }
 
 func Quiesce(alpha float64, beta float64, position *chess.Position) float64 {
-	evaluation := evaluation.Evaluate(position)
+	score := evaluation.Evaluate(position)
 
-	if evaluation >= beta {
+	if score >= beta {
 		return beta
 	}
 
-	alpha = math.Max(evaluation, alpha)
+	alpha = math.Max(score, alpha)
 	moves := position.ValidMoves()
 	var captures []*chess.Move
 
@@ -43,27 +43,21 @@ func Quiesce(alpha float64, beta float64, position *chess.Position) float64 {
 
 	for _, capture := range captures {
 		newPosition := position.Update(capture)
-
-		evaluation = -Quiesce(-beta, -alpha, newPosition)
-
-		if evaluation >= beta {
-			return beta
+		score = -Quiesce(-beta, -alpha, newPosition)
+		alpha = math.Max(alpha, score)
+		if alpha >= beta {
+			return alpha
 		}
-
-		alpha = math.Max(evaluation, alpha)
 	}
 
 	return alpha
 }
 
 func Negamax(depth uint8, alpha float64, beta float64, position *chess.Position) float64 {
-	moves := position.ValidMoves()
-
-	if position.Status() == chess.Checkmate {
+	switch position.Status() {
+	case chess.Checkmate:
 		return math.Inf(-1)
-	}
-
-	if len(moves) == 0 {
+	case chess.Stalemate:
 		return 0.0
 	}
 
@@ -71,58 +65,59 @@ func Negamax(depth uint8, alpha float64, beta float64, position *chess.Position)
 		return Quiesce(alpha, beta, position)
 	}
 
+	moves := position.ValidMoves()
 	OrderMoves(moves, position)
+	b := beta
 
-	for _, move := range moves {
+	for index, move := range moves {
 		newPosition := position.Update(move)
-		evaluation := -Negamax(depth-1, -beta, -alpha, newPosition)
-
-		if evaluation >= beta {
-			return beta
+		score := -Negamax(depth-1, -b, -alpha, newPosition)
+		if score > alpha && score < beta && index > 0 {
+			score = -Negamax(depth-1, -beta, -alpha, newPosition)
 		}
 
-		alpha = math.Max(evaluation, alpha)
+		alpha = math.Max(alpha, score)
+		if alpha >= beta {
+			return alpha
+		}
+
+		b = alpha + 1
 	}
 
 	return alpha
 }
 
-func FindBestMove(depth uint8, game *chess.Game) (*chess.Move, float64) {
-	position := game.Position()
-	moves := position.ValidMoves()
-
-	if position.Status() == chess.Checkmate {
+func FindBestMove(depth uint8, position *chess.Position) (*chess.Move, float64) {
+	switch position.Status() {
+	case chess.Checkmate:
 		return nil, math.Inf(-1)
-	}
-
-	if len(moves) == 0 {
+	case chess.Stalemate:
 		return nil, 0.0
 	}
 
-	bestEvaluation := math.Inf(-1)
+	bestScore := math.Inf(-1)
 	var bestMove *chess.Move
 
+	moves := position.ValidMoves()
 	OrderMoves(moves, position)
 
 	for _, move := range moves {
 		newPosition := position.Update(move)
-		evaluation := -Negamax(depth-1, math.Inf(-1), math.Inf(1), newPosition)
-
-		if bestEvaluation <= evaluation {
-			bestEvaluation = evaluation
+		score := -Negamax(depth-1, math.Inf(-1), math.Inf(1), newPosition)
+		if bestScore <= score {
+			bestScore = score
 			bestMove = move
 		}
 	}
 
-	return bestMove, bestEvaluation
+	return bestMove, bestScore
 }
 
 func PlayBestMove(depth uint8, game *chess.Game) (*chess.Move, float64) {
-	move, evaluation := FindBestMove(depth, game)
-
+	move, score := FindBestMove(depth, game.Position())
 	if move != nil {
 		game.Move(move)
 	}
 
-	return move, evaluation
+	return move, score
 }

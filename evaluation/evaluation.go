@@ -14,7 +14,6 @@ func IsEndgame(position *chess.Position) bool {
 
 	for ; square < 64; square++ {
 		var piece chess.Piece = position.Board().Piece(chess.Square(square))
-
 		if piece.Type() == chess.Bishop || piece.Type() == chess.Knight {
 			minors++
 		}
@@ -61,7 +60,6 @@ func Evaluate(position *chess.Position) float64 {
 
 	for square := 0; square < 64; square++ {
 		piece := position.Board().Piece(chess.Square(square))
-
 		if piece.Color() == chess.NoColor {
 			continue
 		}
