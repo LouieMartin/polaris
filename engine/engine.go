@@ -24,12 +24,11 @@ func OrderMoves(moves []*chess.Move, position *chess.Position) {
 
 func Quiesce(alpha float64, beta float64, position *chess.Position) float64 {
 	score := evaluation.Evaluate(position)
-
-	if score >= beta {
-		return beta
+	alpha = math.Max(alpha, score)
+	if alpha >= beta {
+		return alpha
 	}
 
-	alpha = math.Max(score, alpha)
 	moves := position.ValidMoves()
 	var captures []*chess.Move
 
@@ -40,7 +39,6 @@ func Quiesce(alpha float64, beta float64, position *chess.Position) float64 {
 	}
 
 	OrderMoves(captures, position)
-
 	for _, capture := range captures {
 		newPosition := position.Update(capture)
 		score = -Quiesce(-beta, -alpha, newPosition)
@@ -53,7 +51,7 @@ func Quiesce(alpha float64, beta float64, position *chess.Position) float64 {
 	return alpha
 }
 
-func Negamax(depth uint8, alpha float64, beta float64, position *chess.Position) float64 {
+func Negascout(depth uint8, alpha float64, beta float64, position *chess.Position) float64 {
 	switch position.Status() {
 	case chess.Checkmate:
 		return math.Inf(-1)
@@ -71,9 +69,9 @@ func Negamax(depth uint8, alpha float64, beta float64, position *chess.Position)
 
 	for index, move := range moves {
 		newPosition := position.Update(move)
-		score := -Negamax(depth-1, -b, -alpha, newPosition)
+		score := -Negascout(depth-1, -b, -alpha, newPosition)
 		if score > alpha && score < beta && index > 0 {
-			score = -Negamax(depth-1, -beta, -alpha, newPosition)
+			score = -Negascout(depth-1, -beta, -alpha, newPosition)
 		}
 
 		alpha = math.Max(alpha, score)
@@ -95,15 +93,14 @@ func FindBestMove(depth uint8, position *chess.Position) (*chess.Move, float64) 
 		return nil, 0.0
 	}
 
-	bestScore := math.Inf(-1)
 	var bestMove *chess.Move
-
+	bestScore := math.Inf(-1)
 	moves := position.ValidMoves()
 	OrderMoves(moves, position)
 
 	for _, move := range moves {
 		newPosition := position.Update(move)
-		score := -Negamax(depth-1, math.Inf(-1), math.Inf(1), newPosition)
+		score := -Negascout(depth-1, math.Inf(-1), math.Inf(1), newPosition)
 		if bestScore <= score {
 			bestScore = score
 			bestMove = move
