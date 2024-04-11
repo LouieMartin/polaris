@@ -11,7 +11,6 @@ func IsEndgame(position *chess.Position) bool {
 	var queens uint8 = 0
 	var minors uint8 = 0
 	var square uint8 = 0
-
 	for ; square < 64; square++ {
 		var piece chess.Piece = position.Board().Piece(chess.Square(square))
 		if piece.Type() == chess.Bishop || piece.Type() == chess.Knight {
@@ -32,11 +31,7 @@ func GetPositionalValue(piece chess.Piece, square chess.Square, endgame bool) fl
 	}
 
 	if piece.Type() == chess.King && endgame {
-		if piece.Color() == chess.White {
-			return constants.KingEndgameSquareTable[square]
-		} else {
-			return constants.KingEndgameSquareTable[square]
-		}
+		return constants.KingEndgameSquareTable[square]
 	}
 
 	return constants.PieceSquareTables[piece.Type()][square]
@@ -45,17 +40,15 @@ func GetPositionalValue(piece chess.Piece, square chess.Square, endgame bool) fl
 func EvaluatePiece(piece chess.Piece, square chess.Square, endgame bool) float64 {
 	positionalValue := GetPositionalValue(piece, square, endgame)
 	materialValue := constants.PieceValues[piece.Type()]
-
 	return positionalValue + materialValue
 }
 
 func Evaluate(position *chess.Position) float64 {
-	endgame := IsEndgame(position)
-	var perspective float64
 	score := 0.0
-
-	if perspective = 1; position.Turn() == chess.Black {
-		perspective = -1
+	var turn float64
+	endgame := IsEndgame(position)
+	if turn = 1; position.Turn() == chess.Black {
+		turn = -1
 	}
 
 	for square := 0; square < 64; square++ {
@@ -64,9 +57,8 @@ func Evaluate(position *chess.Position) float64 {
 			continue
 		}
 
-		evaluation := EvaluatePiece(piece, chess.Square(square), endgame)
 		var color float64
-
+		evaluation := EvaluatePiece(piece, chess.Square(square), endgame)
 		if color = 1.0; piece.Color() == chess.Black {
 			color = -1.0
 		}
@@ -74,7 +66,7 @@ func Evaluate(position *chess.Position) float64 {
 		score += evaluation * color
 	}
 
-	return perspective * score
+	return turn * score
 }
 
 func EvaluateCapture(move *chess.Move, position *chess.Position) float64 {
@@ -82,22 +74,20 @@ func EvaluateCapture(move *chess.Move, position *chess.Position) float64 {
 		return constants.PieceValues[chess.Pawn]
 	}
 
-	capturedPiece := position.Board().Piece(move.S2())
 	piece := position.Board().Piece(move.S1())
-
+	capturedPiece := position.Board().Piece(move.S2())
 	return constants.PieceValues[capturedPiece.Type()] - constants.PieceValues[piece.Type()]
 }
 
 func EvaluateMove(move *chess.Move, endgame bool, position *chess.Position) float64 {
+	var turn float64
 	var materialChange float64
-	var perspective float64
-
-	if perspective = 1; position.Turn() == chess.Black {
-		perspective = -1
+	if turn = 1; position.Turn() == chess.Black {
+		turn = -1
 	}
 
 	if move.Promo() != chess.NoPieceType {
-		return perspective * math.Inf(1)
+		return turn * math.Inf(1)
 	}
 
 	piece := position.Board().Piece(move.S1())
@@ -109,5 +99,5 @@ func EvaluateMove(move *chess.Move, endgame bool, position *chess.Position) floa
 		materialChange = EvaluateCapture(move, position)
 	}
 
-	return (positionalValue + materialChange) * perspective
+	return (positionalValue + materialChange) * turn
 }
