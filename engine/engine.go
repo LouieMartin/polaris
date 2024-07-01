@@ -23,12 +23,22 @@ func OrderMoves(moves []*chess.Move, position *chess.Position) {
 }
 
 func Quiesce(alpha float64, beta float64, position *chess.Position) float64 {
+<<<<<<< HEAD
 	score := evaluation.Evaluate(position)
 	alpha = math.Max(alpha, score)
 	if alpha >= beta {
 		return alpha
 	}
 
+=======
+	evaluation := evaluation.Evaluate(position)
+
+	if evaluation >= beta {
+		return beta
+	}
+
+	alpha = math.Max(evaluation, alpha)
+>>>>>>> parent of c6c1530 (Implemented NegaScout)
 	moves := position.ValidMoves()
 	var captures []*chess.Move
 
@@ -41,21 +51,33 @@ func Quiesce(alpha float64, beta float64, position *chess.Position) float64 {
 	OrderMoves(captures, position)
 	for _, capture := range captures {
 		newPosition := position.Update(capture)
-		score = -Quiesce(-beta, -alpha, newPosition)
-		alpha = math.Max(alpha, score)
-		if alpha >= beta {
-			return alpha
+
+		evaluation = -Quiesce(-beta, -alpha, newPosition)
+
+		if evaluation >= beta {
+			return beta
 		}
+
+		alpha = math.Max(evaluation, alpha)
 	}
 
 	return alpha
 }
 
+<<<<<<< HEAD
 func Negascout(depth uint8, alpha float64, beta float64, position *chess.Position) float64 {
 	switch position.Status() {
 	case chess.Checkmate:
+=======
+func Negamax(depth uint8, alpha float64, beta float64, position *chess.Position) float64 {
+	moves := position.ValidMoves()
+
+	if position.Status() == chess.Checkmate {
+>>>>>>> parent of c6c1530 (Implemented NegaScout)
 		return math.Inf(-1)
-	case chess.Stalemate:
+	}
+
+	if len(moves) == 0 {
 		return 0.0
 	}
 
@@ -63,58 +85,76 @@ func Negascout(depth uint8, alpha float64, beta float64, position *chess.Positio
 		return Quiesce(alpha, beta, position)
 	}
 
-	moves := position.ValidMoves()
 	OrderMoves(moves, position)
-	b := beta
 
-	for index, move := range moves {
+	for _, move := range moves {
 		newPosition := position.Update(move)
+<<<<<<< HEAD
 		score := -Negascout(depth-1, -b, -alpha, newPosition)
 		if score > alpha && score < beta && index > 0 {
 			score = -Negascout(depth-1, -beta, -alpha, newPosition)
+=======
+		evaluation := -Negamax(depth-1, -beta, -alpha, newPosition)
+
+		if evaluation >= beta {
+			return beta
+>>>>>>> parent of c6c1530 (Implemented NegaScout)
 		}
 
-		alpha = math.Max(alpha, score)
-		if alpha >= beta {
-			return alpha
-		}
-
-		b = alpha + 1
+		alpha = math.Max(evaluation, alpha)
 	}
 
 	return alpha
 }
 
-func FindBestMove(depth uint8, position *chess.Position) (*chess.Move, float64) {
-	switch position.Status() {
-	case chess.Checkmate:
+func FindBestMove(depth uint8, game *chess.Game) (*chess.Move, float64) {
+	position := game.Position()
+	moves := position.ValidMoves()
+
+	if position.Status() == chess.Checkmate {
 		return nil, math.Inf(-1)
-	case chess.Stalemate:
+	}
+
+	if len(moves) == 0 {
 		return nil, 0.0
 	}
 
+<<<<<<< HEAD
 	var bestMove *chess.Move
 	bestScore := math.Inf(-1)
 	moves := position.ValidMoves()
+=======
+	bestEvaluation := math.Inf(-1)
+	var bestMove *chess.Move
+
+>>>>>>> parent of c6c1530 (Implemented NegaScout)
 	OrderMoves(moves, position)
 
 	for _, move := range moves {
 		newPosition := position.Update(move)
+<<<<<<< HEAD
 		score := -Negascout(depth-1, math.Inf(-1), math.Inf(1), newPosition)
 		if bestScore <= score {
 			bestScore = score
+=======
+		evaluation := -Negamax(depth-1, math.Inf(-1), math.Inf(1), newPosition)
+
+		if bestEvaluation <= evaluation {
+			bestEvaluation = evaluation
+>>>>>>> parent of c6c1530 (Implemented NegaScout)
 			bestMove = move
 		}
 	}
 
-	return bestMove, bestScore
+	return bestMove, bestEvaluation
 }
 
 func PlayBestMove(depth uint8, game *chess.Game) (*chess.Move, float64) {
-	move, score := FindBestMove(depth, game.Position())
+	move, evaluation := FindBestMove(depth, game)
+
 	if move != nil {
 		game.Move(move)
 	}
 
-	return move, score
+	return move, evaluation
 }
