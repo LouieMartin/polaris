@@ -13,7 +13,6 @@ func IsEndgame(position *chess.Position) bool {
 	var square uint8 = 0
 	for ; square < 64; square++ {
 		var piece chess.Piece = position.Board().Piece(chess.Square(square))
-
 		if piece.Type() == chess.Bishop || piece.Type() == chess.Knight {
 			minors++
 		}
@@ -54,7 +53,6 @@ func Evaluate(position *chess.Position) float64 {
 
 	for square := 0; square < 64; square++ {
 		piece := position.Board().Piece(chess.Square(square))
-
 		if piece.Color() == chess.NoColor {
 			continue
 		}
@@ -96,7 +94,6 @@ func EvaluateMove(move *chess.Move, endgame bool, position *chess.Position) floa
 	fromValue := GetPositionalValue(piece, move.S1(), endgame)
 	toValue := GetPositionalValue(piece, move.S2(), endgame)
 	positionalValue := toValue - fromValue
-
 	if move.HasTag(chess.Capture) {
 		materialChange = EvaluateCapture(move, position)
 	}
